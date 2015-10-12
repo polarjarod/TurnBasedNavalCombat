@@ -1,34 +1,37 @@
-
-public class FleetCarrier implements Ship{
-
-	private int squads=0,squadLim, hP, count, move, squadsAir, SA, range, ammo, shots;
+public class HeavyCruiser implements Ship{
+	
+	private String name;
+	private int move, count, hP, range, ammo, shots;
 	private int X,Y;
 	private int X1, Y1;
 	private boolean canMove;
 	private final boolean side;
 	private boolean donezo;
 	private boolean direction;
-public FleetCarrier(boolean s, int x, int y){
-	ammo = 1;
+public HeavyCruiser(boolean s, int x, int y){
 	side = s;
-	range = 6;
+	range = 9;
+	shots = 0; 
+	
 	if(side==true){
-		squadLim=10;
+		name = "Northampton";
 		direction = true;
-		SA = 4;
+		ammo = 1;
+		move = 4;
 	}
 	else{
-	direction = false;
-		squadLim=11;
-		SA = 5;
+		name = "Mogami";
+		direction = false;
+		ammo = 1;
+		move = 5;
 	}
 	canMove=false;
 	X=x;
 	Y=y;
-	move = 3;
+	 
 	setHP(regHP());
 	donezo = false;
-	squadsAir=0;
+	
 }
 public boolean donezo(){
 	return donezo;
@@ -36,31 +39,13 @@ public boolean donezo(){
 public void newTurn(){
 	canMove = true;
 	count=0;
-	shots =0;
+	shots=0;
 }
 	
-public int numSquads(){
-	return squads;
-}
-public void planeReturn(){
-	squadLim++;
-	squadsAir--;
-}
-public void planeShotDown(){
-	squadsAir--;
-}
-public boolean buyPlane(){
-	if(squadLim>0 && squadsAir<SA){
-		squadLim--;
-		squadsAir++;
-		return true;
-	}
-	return false;
-}
 
 public int getAA() {
 	if(side == true){
-		return 80;
+		return 60;
 	}
 	else{
 		return 50;
@@ -73,7 +58,7 @@ public int getHP() {
 }
 
 public int regHP() {
-	return 1000;
+	return 500;
 }
 
 public int Speed() {
@@ -88,16 +73,16 @@ public void setHP(int hp) {
 
 public int getGAttack() {
 	if(side == true){
-		return 50;
+		return 235;
 	}
 	else{
-		return 10;
+		return 250;
 	}
 }
 
 
 public int getArmor() {
-	return 8;
+	return 0;
 }
 
 
@@ -174,17 +159,12 @@ public void moveD() {
 
 @Override
 public String name() {
-	if(side==true){
-		return "USS Lexington";
-	}
-	else{
-		return "IJN Akagi";
-	}
+	return name;
 	}
 
 @Override
 public boolean isCV() {
-	return true;
+	return false;
 }
 
 @Override
@@ -196,17 +176,32 @@ public void mFD() {
 @Override
 public int aaRange() {
 	if(side)
-	return 5;
-	else
 	return 6;
+	else
+	return 5;
 }
 @Override
 public int Identity() {
-	return 0;
+	return 3;
 }
 @Override
 public boolean getDirection() {
 	return direction;
+}
+@Override
+public boolean buyPlane() {
+	// TODO Auto-generated method stub
+	return false;
+}
+@Override
+public void planeReturn() {
+	// TODO Auto-generated method stub
+	
+}
+@Override
+public void planeShotDown() {
+	// TODO Auto-generated method stub
+	
 }
 @Override
 public int gunneryRange() {

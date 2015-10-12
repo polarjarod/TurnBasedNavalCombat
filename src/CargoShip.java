@@ -1,7 +1,7 @@
 public class CargoShip implements Ship{
 	
 	private String name;
-	private int move, count, hP;
+	private int move, count, hP, range, ammo, shots;
 	private int X,Y;
 	private int X1, Y1;
 	private boolean canMove;
@@ -10,13 +10,17 @@ public class CargoShip implements Ship{
 	private boolean direction;
 public CargoShip(boolean s, int x, int y){
 	side = s;
+	range = 4;
+	shots = 0; 
+	ammo = 1;
 	if(side==true){
-		
+		name = "Liberty";
 		direction = true;
 
 	}
 	else{
-	direction = false;
+		name = "Cargo Ship";
+		direction = false;
 		
 	}
 	canMove=false;
@@ -33,6 +37,7 @@ public boolean donezo(){
 public void newTurn(){
 	canMove = true;
 	count=0;
+	shots=0;
 }
 	
 
@@ -194,6 +199,21 @@ public void planeReturn() {
 @Override
 public void planeShotDown() {
 	// TODO Auto-generated method stub
+	
+}
+@Override
+public int gunneryRange() {
+	return range;
+}
+@Override
+public boolean Ammo() {
+	if(shots<ammo)
+		return true;
+	return false;
+}
+@Override
+public void fire() {
+	shots++;
 	
 }
 

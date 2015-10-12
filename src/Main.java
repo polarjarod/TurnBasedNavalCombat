@@ -17,7 +17,7 @@ public class Main  {
 	private Frame game;
 	private GameBoard can;
 	private Arsenal fleets;
-	private Combat battle;
+	//private Combat battle;
 	private Entity CV1, CV2;
 	private int Doorknocks1=0, Doorknocks2=0;
 	
@@ -35,7 +35,14 @@ public class Main  {
 		int screenSizeY = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode().getHeight();
 		can = new GameBoard(screenSizeX, screenSizeY);
 		game = new Frame(can);
-		
+		StartScreen start = new StartScreen(screenSizeX, screenSizeY);
+		while(start.run()){
+			try {
+				Thread.sleep(50);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		run();
 	}
 	
@@ -125,8 +132,43 @@ public class Main  {
 		    	try{
 		    		Thread.sleep(20);
 		    	} catch(Exception e){}
-		    	
-		   
+		    	boolean fine = true;
+		  for(int i = 0; i<=fleets.getP1Fleet(); i++){
+			   for(int o = 0; o <=fleets.getP2Fleet(); o++){
+				   if(fine && fleets.P1Fleet().get(i).X() == fleets.P2Fleet().get(o).X() && fleets.P1Fleet().get(i).Y() == fleets.P2Fleet().get(o).Y()){
+					  Entity nship1, nship2;
+					   int h1,h2;
+					 nship1 = fleets.P1Fleet().get(i);
+					 nship2 = fleets.P2Fleet().get(o);
+					   h1 = fleets.P1Fleet().get(i).getHP()-fleets.P2Fleet().get(o).getHP();
+					   h2 = fleets.P2Fleet().get(o).getHP()-fleets.P1Fleet().get(i).getHP();
+					   if(h1<=0){
+						   fleets.P1Fleet().remove(i);
+							   fine = false;
+							   
+						   game.collide();
+						  
+					   }
+					   else{
+						   nship1.setHP(h1);
+						   fleets.P1Fleet().set(i,nship1);
+					   }
+					   if(h2<=0){
+						   fleets.P2Fleet().remove(o);
+						   game.collide();
+						   fine = false;
+						   
+					   }
+					   else{
+						   nship2.setHP(h2);
+						   fleets.P2Fleet().set(o, nship2);
+					   }
+				   }
+			   }
+		  if(!fine){
+			  
+		  }
+		  } 
 			   
 		  	if(fleets.getP2Fleet()>-1){  	
 		    for(int i = 0; i<=fleets.getP2Fleet();i++){
@@ -152,6 +194,7 @@ public class Main  {
 		    game.setMax(fleets.getP1Fleet(), fleets.getP2Fleet());
 		    can.setAttack(fleets.P1Fleet().get(game.attacker()).X(),fleets.P1Fleet().get(game.attacker()).Y());	
 		    can.setStats(fleets.P1Fleet().get(game.attacker()));
+		    can.setRD(game.rangeDisp());
 		    if(fleets.getP2Fleet()>-1){ 
 		    can.setUnit(fleets.P2Fleet().get(game.defender()).X(), fleets.P2Fleet().get(game.defender()).Y());
 		    }
@@ -171,8 +214,9 @@ public class Main  {
 			     if(p.bomb()){
 			    	 int bombX = p.X();
 			    	 int bombY = p.Y();
+			    	 boolean fine2 = true;
 			    	 for(int i = 0; i<=fleets.getP2Fleet(); i++){
-			    		 if(fleets.P2Fleet().get(i).X() >= bombX-1 && fleets.P2Fleet().get(i).X() <= bombX+1)
+			    		 if(fine2 && fleets.P2Fleet().get(i).X() >= bombX-1 && fleets.P2Fleet().get(i).X() <= bombX+1)
 			    			 if(fleets.P2Fleet().get(i).Y() >= bombY-1 && fleets.P2Fleet().get(i).Y() <= bombY+1){
 			    				 int h = fleets.P2Fleet().get(i).getHP();
 			    				 h-= ((p.getHP()*2));
@@ -183,6 +227,9 @@ public class Main  {
 			    				 }
 			    				 else{
 			    					 fleets.P2Fleet().remove(i);
+			    					 fine2 = false;
+									   
+									 game.collide();
 			    				 }
 			    			 } 
 			    	 }
@@ -202,18 +249,55 @@ public class Main  {
 						CV1.planeReturn();
 					}
 			    }
+	
+			if(fleets.P1Fleet().get(game.attacker()).Y()+fleets.P1Fleet().get(game.attacker()).gunneryRange()+1 >= fleets.P2Fleet().get(game.defender()).Y() && fleets.P1Fleet().get(game.attacker()).Y()-fleets.P1Fleet().get(game.attacker()).gunneryRange() <= fleets.P2Fleet().get(game.defender()).Y()){
+				if(fleets.P1Fleet().get(game.attacker()).X()+fleets.P1Fleet().get(game.attacker()).gunneryRange()+1 >= fleets.P2Fleet().get(game.defender()).X() && fleets.P1Fleet().get(game.attacker()).X()-fleets.P1Fleet().get(game.attacker()).gunneryRange() <= fleets.P2Fleet().get(game.defender()).X()){
+					if(game.wantFire()&&fleets.P1Fleet().get(game.attacker()).Ammo()){
+						fleets.P1Fleet().get(game.attacker()).fire();
+						int h = fleets.P2Fleet().get(game.defender()).getHP();
+						h -= fleets.P1Fleet().get(game.attacker()).getGAttack();
+						Entity nShip = fleets.P2Fleet().get(game.defender());
+				 
+				 if(h>0){
+				 nShip.setHP(h);
+				 fleets.P2Fleet().set(game.defender(), nShip);
+				 }
+				 
+				 else{
+					 fleets.P2Fleet().remove(game.defender());
+					  
+					 game.collide();
+				 }
+				 game.setFire(false);
+					}
+				}	
+			}
 			
-			if(fleets.P1Fleet().get(game.attacker()).canMove()){
-				if(game.getWant()==1 ){
+			boolean moveD = true,moveS = true,moveA = true, moveW = true;
+			for(int i = 0; i<=fleets.getP1Fleet(); i++){
+					int x = fleets.P1Fleet().get(game.attacker()).X();
+					int y = fleets.P1Fleet().get(game.attacker()).Y();
+				if(x+1 == fleets.P1Fleet().get(i).X() && y == fleets.P1Fleet().get(i).Y())
+					moveD = false;
+				if(x-1 == fleets.P1Fleet().get(i).X() && y == fleets.P1Fleet().get(i).Y())
+					moveA = false;
+				if(y+1 == fleets.P1Fleet().get(i).Y() && x == fleets.P1Fleet().get(i).X())
+					moveS = false;
+				if(y-1 == fleets.P1Fleet().get(i).Y() && x == fleets.P1Fleet().get(i).X())
+					moveW = false;							
+			}
+			 
+			if(fleets.P1Fleet().get(game.attacker()).canMove() && moveW || moveA || moveS || moveD){
+				if(game.getWant()==1 && moveW){
 					if(fleets.P1Fleet().get(game.attacker()).Y()>0){
 						fleets.P1Fleet().get(game.attacker()).moveW();
 					game.resWant();
 					}
-					else	
+					else
 					game.resWant();
 					
 				}
-				if(game.getWant()==2){
+				if(game.getWant()==2 && moveA){
 					if(fleets.P1Fleet().get(game.attacker()).X()>0){
 						fleets.P1Fleet().get(game.attacker()).moveA();
 					game.resWant();
@@ -222,7 +306,7 @@ public class Main  {
 					game.resWant();
 				
 				}
-				if(game.getWant()==3){
+				if(game.getWant()==3 && moveS){
 					if(fleets.P1Fleet().get(game.attacker()).Y()<39){
 						fleets.P1Fleet().get(game.attacker()).moveS();
 					game.resWant();
@@ -231,7 +315,7 @@ public class Main  {
 					game.resWant();
 					
 				}
-				if(game.getWant()==4){
+				if(game.getWant()==4 && moveD){
 					if(fleets.P1Fleet().get(game.attacker()).X()<50){
 						fleets.P1Fleet().get(game.attacker()).moveD();
 					game.resWant();
@@ -316,6 +400,42 @@ public class Main  {
 					Thread.sleep(20);
 				} catch(Exception e){}
 				
+		    	boolean fine = true;
+				  for(int i = 0; i<=fleets.getP1Fleet(); i++){
+					   for(int o = 0; o <=fleets.getP2Fleet(); o++){
+						   if(fine && fleets.P1Fleet().get(i).X() == fleets.P2Fleet().get(o).X() && fleets.P1Fleet().get(i).Y() == fleets.P2Fleet().get(o).Y()){
+							  Entity nship1, nship2;
+							   int h1,h2;
+							 nship1 = fleets.P1Fleet().get(i);
+							 nship2 = fleets.P2Fleet().get(o);
+							   h1 = fleets.P1Fleet().get(i).getHP()-fleets.P2Fleet().get(o).getHP();
+							   h2 = fleets.P2Fleet().get(o).getHP()-fleets.P1Fleet().get(i).getHP();
+							   if(h1<=0){
+								   fleets.P1Fleet().remove(i);
+									   fine = false;
+									   
+								   game.collide();
+
+							   }
+							   else{
+								   nship1.setHP(h1);
+								   fleets.P1Fleet().set(i,nship1);
+							   }
+							   if(h2<=0){
+								   fleets.P2Fleet().remove(o);
+								   game.collide();
+								   fine = false;
+			
+							   }
+							   else{
+								   nship2.setHP(h2);
+								   fleets.P2Fleet().set(o, nship2);
+							   }
+						   }
+					   }
+				  if(!fine){
+				  }
+				  } 
 				
 				if(fleets.getP1Fleet()>-1){   
 				for(int i = 0; i<fleets.getP1Fleet();i++){
@@ -363,8 +483,9 @@ public class Main  {
 				 if(p.bomb()){
 			    	 int bombX = p.X();
 			    	 int bombY = p.Y();
+			    	 boolean fine1 = true;
 			    	 for(int i = 0; i<=fleets.getP1Fleet(); i++){
-			    		 if(fleets.P1Fleet().get(i).X() >= bombX-1 && fleets.P1Fleet().get(i).X() <= bombX+1)
+			    		 if(fine1 && fleets.P1Fleet().get(i).X() >= bombX-1 && fleets.P1Fleet().get(i).X() <= bombX+1)
 			    			 if(fleets.P1Fleet().get(i).Y() >= bombY-1 && fleets.P1Fleet().get(i).Y() <= bombY+1){
 			    				 int h = fleets.P1Fleet().get(i).getHP();
 			    				 h-= ((p.getHP()*2));
@@ -375,6 +496,9 @@ public class Main  {
 			    				 }
 			    				 else{
 			    					 fleets.P1Fleet().remove(i);
+			    					 fine1 = false;
+									   
+									 game.collide();
 			    				 }
 			    			 } 
 			    	 }
@@ -394,10 +518,44 @@ public class Main  {
 					CV2.planeReturn();
 				}
 		    }
+			if(fleets.P2Fleet().get(game.attacker()).Y()+fleets.P2Fleet().get(game.attacker()).gunneryRange()+1 >= fleets.P1Fleet().get(game.defender()).Y() && fleets.P2Fleet().get(game.attacker()).Y()-fleets.P2Fleet().get(game.attacker()).gunneryRange() <= fleets.P1Fleet().get(game.defender()).Y()){
+				if(fleets.P2Fleet().get(game.attacker()).X()+fleets.P2Fleet().get(game.attacker()).gunneryRange()+1 >= fleets.P1Fleet().get(game.defender()).X() && fleets.P2Fleet().get(game.attacker()).X()-fleets.P2Fleet().get(game.attacker()).gunneryRange() <= fleets.P1Fleet().get(game.defender()).X()){
+			 if(game.wantFire()&&fleets.P2Fleet().get(game.attacker()).Ammo()){
+				 	fleets.P2Fleet().get(game.attacker()).fire();
+					int h = fleets.P1Fleet().get(game.defender()).getHP();
+					h -= fleets.P2Fleet().get(game.attacker()).getGAttack();
+					Entity nShip = fleets.P1Fleet().get(game.defender());
+					 
+					 if(h>0){
+					 nShip.setHP(h);
+					 fleets.P1Fleet().set(game.defender(), nShip);
+					 }
+					 
+					 else{
+						 fleets.P1Fleet().remove(game.defender());
+					 }
+					 game.setFire(false);
+				}
+				}
+			}
 			
-			if(fleets.P2Fleet().get(game.attacker()).canMove()){
-				if(game.getWant()==1){
-					if(fleets.P2Fleet().get(game.attacker()).Y()>=0){
+			boolean moveD = true,moveS = true,moveA = true, moveW = true;
+			for(int i = 0; i<=fleets.getP2Fleet(); i++){
+					int x = fleets.P2Fleet().get(game.attacker()).X();
+					int y = fleets.P2Fleet().get(game.attacker()).Y();
+				if(x+1 == fleets.P2Fleet().get(i).X() && y == fleets.P2Fleet().get(i).Y())
+					moveD = false;
+				if(x-1 == fleets.P2Fleet().get(i).X() && y == fleets.P2Fleet().get(i).Y())
+					moveA = false;
+				if(y+1 == fleets.P2Fleet().get(i).Y() && x == fleets.P2Fleet().get(i).X())
+					moveS = false;
+				if(y-1 == fleets.P2Fleet().get(i).Y() && x == fleets.P2Fleet().get(i).X())
+					moveW = false;							
+			}
+			
+			if(fleets.P2Fleet().get(game.attacker()).canMove() && moveW || moveA || moveS || moveD){
+				if(game.getWant()==1 && moveW){
+					if(fleets.P2Fleet().get(game.attacker()).Y()>0){
 						fleets.P2Fleet().get(game.attacker()).moveW();
 					game.resWant();
 				}
@@ -405,8 +563,8 @@ public class Main  {
 						game.resWant();
 				
 				}
-				if(game.getWant()==2){
-					if(fleets.P2Fleet().get(game.attacker()).X()>=0){
+				if(game.getWant()==2 && moveA){
+					if(fleets.P2Fleet().get(game.attacker()).X()>0){
 						fleets.P2Fleet().get(game.attacker()).moveA();
 					game.resWant();
 				}
@@ -414,8 +572,8 @@ public class Main  {
 						game.resWant();
 					
 				}
-				if(game.getWant()==3){
-					if(fleets.P2Fleet().get(game.attacker()).Y()<=39){
+				if(game.getWant()==3 && moveS){
+					if(fleets.P2Fleet().get(game.attacker()).Y()<39){
 						fleets.P2Fleet().get(game.attacker()).moveS();
 					game.resWant();
 				}
@@ -423,7 +581,7 @@ public class Main  {
 						game.resWant();
 					
 				}
-				if(game.getWant()==4){
+				if(game.getWant()==4 && moveD){
 					if(fleets.P2Fleet().get(game.attacker()).X()<50){
 						fleets.P2Fleet().get(game.attacker()).moveD();
 					game.resWant();

@@ -15,6 +15,17 @@ public class Arsenal {
 			player2.add(new FleetCarrier(false, 45, 35));
 			player1.add(new CargoShip(true, 5, 30));
 			player2.add(new CargoShip(false, 45, 30));
+			player1.add(new CargoShip(true, 5, 25));
+			player2.add(new CargoShip(false, 45, 25));
+			player1.add(new CargoShip(true, 5, 20));
+			player2.add(new CargoShip(false, 45, 20));
+			player1.add(new CargoShip(true, 5, 15));
+			player2.add(new CargoShip(false, 45, 15));
+			player1.add(new CargoShip(true, 10, 27));
+			player2.add(new CargoShip(false, 40, 27));
+			player1.add(new CargoShip(true, 10, 22));
+			player2.add(new CargoShip(false, 40, 22));
+			
 			break;
 		}
 	}

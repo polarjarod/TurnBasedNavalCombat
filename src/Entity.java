@@ -14,6 +14,7 @@ public interface Entity {
 	public int regHP();
 	public void setHP(int hp);
 	public int getGAttack();
+	public int gunneryRange();
 	public void newTurn();
 	public String name();
 	public boolean isCV();
@@ -26,4 +27,6 @@ public interface Entity {
 	public void planeShotDown();
 	public int Identity();
 	public boolean getDirection();
+	public boolean Ammo();
+	public void fire();
 }
